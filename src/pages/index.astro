@@ -8,7 +8,9 @@ import '../styles/global.css';
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Aprende álgebra en 3D: escribe una ecuación y mírala resolverse paso a paso con bloques, balanzas y gráficas." />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>∑</text></svg>" />
+    <link rel="icon" type="image/png" href={`${import.meta.env.BASE_URL}/favicon.png`} />
+    <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}/apple-touch-icon.png`} />
+    <meta property="og:image" content={new URL(`${import.meta.env.BASE_URL}/algebra-3d-logo.webp`, Astro.site).href} />
     <title>Álgebra 3D</title>
   </head>
   <body>

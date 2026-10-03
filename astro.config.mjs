@@ -4,6 +4,7 @@ import preact from '@astrojs/preact';
 // Astro runs on Vite; the Three.js scene is a client-only Preact island.
 export default defineConfig({
   // Deployed under acidkey.xyz/projects/algebra-3d/ (see README "Deploy").
+  site: 'https://acidkey.xyz',
   base: '/projects/algebra-3d',
   integrations: [preact()],
   vite: {

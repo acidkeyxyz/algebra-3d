@@ -1,3 +1,5 @@
+<img src="public/algebra-3d-logo.webp" alt="Álgebra 3D logo" width="160" align="right" />
+
 # Álgebra 3D
 
 Interactive algebra for students aged 13–16. Type an equation and watch it solved step by step in a 3D scene:
