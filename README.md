@@ -13,6 +13,8 @@ Interactive algebra for students aged 13–16. Type an equation and watch it sol
 - **Examples sidebar**: the list scrolls forever and generates new practice formulas with clean answers. Click ☆ to pin a formula to the Favorites stack at the top (saved in localStorage). The ☆ next to the input pins your own formula.
 - **Help guide**: the **? Ayuda / Help** button to the right of the language switch opens a guide covering typing rules, every problem type (with clickable examples), step and camera controls, colours, favorites, and troubleshooting.
 - **Languages**: Spanish (Mexico) by default; the ES/EN switch in the header changes to English (US). The choice is remembered (`?lang=en` also works).
+- **Mobile layout**: on screens up to 720px wide, expand buttons open the formula and examples, the 3D canvas, or the step card full screen, and a floating ✕ button at the bottom closes it. The formula badge over the canvas is hidden there, since the step card already shows it.
+- **Sharing**: links (including `?q=` links) show a preview with `public/og-image.jpg`. See [Link previews](#link-previews).
 
 ## Stack
 
