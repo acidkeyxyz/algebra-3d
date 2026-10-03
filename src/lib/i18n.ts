@@ -91,6 +91,10 @@ const en = {
   mine: 'Mine',
   showExamples: 'Examples',
   helpGuide: 'Help',
+  expandInput: 'Expand formula and examples',
+  expandStage: 'Expand 3D view',
+  expandSteps: 'Expand steps',
+  closeExpanded: 'Close',
   levels: {
     Line: 'Line',
     Balance: 'Balance',
@@ -153,6 +157,10 @@ const es: typeof en = {
   mine: 'Mía',
   showExamples: 'Ejemplos',
   helpGuide: 'Ayuda',
+  expandInput: 'Ampliar fórmula y ejemplos',
+  expandStage: 'Ampliar vista 3D',
+  expandSteps: 'Ampliar pasos',
+  closeExpanded: 'Cerrar',
   levels: {
     Line: 'Recta',
     Balance: 'Balanza',

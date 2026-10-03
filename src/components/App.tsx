@@ -34,6 +34,17 @@ const EXAMPLES: (Example & { label: string })[] = [
   { label: 'y = x²; y = 2 − x²; y = x', q: 'y = x^2; y = 2 - x^2; y = x', level: 'System' },
 ];
 
+/** Mobile only: one section takes the whole screen. */
+type Expanded = 'input' | 'stage' | 'steps' | null;
+
+function ExpandIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+    </svg>
+  );
+}
+
 function initialQuery(): string {
   try {
     const q = new URLSearchParams(location.search).get('q');
@@ -56,6 +67,11 @@ export default function App() {
   const [favs, setFavs] = useState<Example[]>(loadFavorites);
   const [sideOpen, setSideOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [expanded, setExpanded] = useState<Expanded>(null);
+  const expand = (x: Expanded) => {
+    setSideOpen(false);
+    setExpanded(x);
+  };
   const flipFav = (ex: Example) =>
     setFavs((f) => {
       const next = toggleFav(f, ex);
@@ -105,6 +121,7 @@ export default function App() {
     setQuery(q);
     setStepIdx(0);
     setPlaying(false);
+    setExpanded((x) => (x === 'input' ? null : x));
     try {
       const url = new URL(location.href);
       url.searchParams.set('q', q);
@@ -145,8 +162,11 @@ export default function App() {
   const cam = (name: CameraPreset) => setPreset((p) => ({ name, n: p.n + 1 }));
 
   return (
-    <div class="app">
+    <div class={`app${expanded ? ` x-${expanded}` : ''}`}>
       <header class="top">
+        <button type="button" class="expand-btn top-expand" onClick={() => expand('input')} title={t.expandInput} aria-label={t.expandInput}>
+          <ExpandIcon />
+        </button>
         <div class="brand">
           <span class="logo">∑</span>
           <div>
@@ -223,6 +243,9 @@ export default function App() {
             <button title={t.sideTitle} onClick={() => cam('side')}>{t.side}</button>
             <button title={t.spin} class={autoRotate ? 'on' : ''} onClick={() => setAutoRotate((a) => !a)}>⟳</button>
             <button title={t.helpTitle} class={help ? 'on' : ''} onClick={() => setHelp((h) => !h)}>?</button>
+            <button class="expand-btn" onClick={() => expand('stage')} title={t.expandStage} aria-label={t.expandStage}>
+              <ExpandIcon />
+            </button>
           </div>
         </div>
 
@@ -266,6 +289,9 @@ export default function App() {
                 <div class="progress">
                   <div class="count">
                     {t.step} {stepIdx + 1} / {steps.length}
+                    <button class="expand-btn steps-expand" onClick={() => expand('steps')} title={t.expandSteps} aria-label={t.expandSteps}>
+                      <ExpandIcon />
+                    </button>
                   </div>
                   <div class="dots">
                     {steps.map((s, i) => (
@@ -305,6 +331,11 @@ export default function App() {
         )}
       </main>
       </div>
+      {expanded && (
+        <button type="button" class="close-expanded" onClick={() => setExpanded(null)}>
+          ✕ {t.closeExpanded}
+        </button>
+      )}
       {guideOpen && (
         <HelpModal
           lang={lang}

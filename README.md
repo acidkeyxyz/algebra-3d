@@ -42,6 +42,10 @@ git push
 
 nginx serves the fanpage.me folder as static files, so new builds show up right away. Restart it (`sudo systemctl reload nginx`) only after changing its config.
 
+### Link previews
+
+`src/pages/index.astro` sets Open Graph / Twitter tags with `public/og-image.jpg` (1200×630). Crawlers don't run JS, so links with `?q=` get different copy from nginx instead: a `map $arg_q` picks a fixed "👀 Mira esta ecuación que resolví en 3D" title/description and `sub_filter` swaps it in on `/projects/algebra-3d/`. The query is never written into the HTML. `sub_filter` matches the exact `shareTitle`/`shareText` strings, so update the nginx config if you change them.
+
 ## Layout
 
 - `src/lib/parser.ts` turns student input (`2x`, `3(x+1)`, `x²`, `−`) into an AST, then a polynomial or numeric function.

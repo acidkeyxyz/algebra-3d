@@ -322,3 +322,39 @@ kbd {
   .modal-backdrop { padding: 8px; }
   .modal { max-height: calc(100dvh - 16px); border-radius: 14px; }
 }
+
+/* ---------- mobile: expand one section to full screen ---------- */
+.expand-btn, .close-expanded { display: none; }
+@media (max-width: 720px) {
+  .top { position: relative; }
+  .expand-btn {
+    display: grid; place-items: center; padding: 0; width: 44px; height: 40px; border-radius: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.55); background: var(--panel); color: var(--accent);
+  }
+  .expand-btn svg { width: 20px; height: 20px; }
+  .expand-btn:active { background: #0c4a6e; }
+  .top-expand { position: absolute; top: 10px; right: 16px; }
+  .count { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .close-expanded {
+    display: block; position: fixed; z-index: 90; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom));
+    transform: translateX(-50%); padding: 12px 22px; border-radius: 999px; border: 0; font-weight: 700; font-size: 15px;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  }
+  .app[class*=' x-'] .expand-btn, .app[class*=' x-'] .side-toggle { display: none; }
+
+  /* Formula + examples: header on top, the examples list fills the rest. */
+  .x-input .stage-wrap { display: none; }
+  .x-input .side { position: static; transform: none; width: 100%; box-shadow: none; border-right: 0; padding-bottom: 76px; }
+
+  /* 3D canvas: nothing but the scene and its camera buttons. */
+  .x-stage .top, .x-stage .card { display: none; }
+
+  /* Steps: the card covers the whole screen. */
+  .x-steps .top, .x-steps .hud-top, .x-steps .legend, .x-steps .help { display: none; }
+  .x-steps .card {
+    inset: 0; transform: none; width: 100%; max-height: none; border-radius: 0; border: 0;
+    background: var(--panel-solid); padding: 16px 16px 84px;
+  }
+  .x-steps .card h2 { font-size: 21px; }
+  .x-steps .card p { font-size: 16px; }
+}

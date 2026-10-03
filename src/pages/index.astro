@@ -1,6 +1,15 @@
 ---
 import App from '../components/App.tsx';
 import '../styles/global.css';
+
+// Link previews (WhatsApp, Telegram, X…). Crawlers don't run JS, so these are static.
+// nginx swaps shareTitle/shareText for "look at this equation" copy when the link has ?q=
+// (sub_filter matches these exact strings; see README "Link previews"). No og:url on purpose:
+// some crawlers re-fetch og:url and would lose the ?q= variant.
+const pageUrl = new URL(`${import.meta.env.BASE_URL}/`, Astro.site).href;
+const ogImage = new URL(`${import.meta.env.BASE_URL}/og-image.jpg`, Astro.site).href;
+const shareTitle = '🤯 ¿Puedes resolver esta ecuación? | Álgebra 3D';
+const shareText = 'Escribe cualquier ecuación y mírala resolverse paso a paso en 3D, con balanzas, bloques y gráficas. ¡Pruébalo gratis!';
 ---
 <!doctype html>
 <html lang="es-MX">
@@ -10,7 +19,21 @@ import '../styles/global.css';
     <meta name="description" content="Aprende álgebra en 3D: escribe una ecuación y mírala resolverse paso a paso con bloques, balanzas y gráficas." />
     <link rel="icon" type="image/png" href={`${import.meta.env.BASE_URL}/favicon.png`} />
     <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}/apple-touch-icon.png`} />
-    <meta property="og:image" content={new URL(`${import.meta.env.BASE_URL}/algebra-3d-logo.webp`, Astro.site).href} />
+    <link rel="canonical" href={pageUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Álgebra 3D" />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:title" content={shareTitle} />
+    <meta property="og:description" content={shareText} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Álgebra 3D: una balanza con bloques de álgebra" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={shareTitle} />
+    <meta name="twitter:description" content={shareText} />
+    <meta name="twitter:image" content={ogImage} />
     <title>Álgebra 3D</title>
   </head>
   <body>
