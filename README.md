@@ -24,6 +24,22 @@ npm test         # solver tests (vitest)
 npm run build    # static site in dist/
 ```
 
+## Deploy
+
+The site is served from the [fanpage.me](https://github.com/acidkeyxyz/fanpage.me) repo at [acidkey.xyz/projects/algebra-3d/](https://acidkey.xyz/projects/algebra-3d/), which is why `astro.config.mjs` sets `base: '/projects/algebra-3d'`.
+
+```sh
+nvm use                # pnpm runs scripts with whatever `node` is on PATH; Astro needs ≥ 22.12
+pnpm build
+rsync -a --delete dist/ ../fanpage.me/projects/algebra-3d/
+cd ../fanpage.me
+git add projects/algebra-3d
+git commit -m "chore(algebra-3d): deploy new build"
+git push
+```
+
+nginx serves the fanpage.me folder as static files, so new builds show up right away. Restart it (`sudo systemctl reload nginx`) only after changing its config.
+
 ## Layout
 
 - `src/lib/parser.ts` turns student input (`2x`, `3(x+1)`, `x²`, `−`) into an AST, then a polynomial or numeric function.
