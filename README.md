@@ -44,7 +44,7 @@ nginx serves the fanpage.me folder as static files, so new builds show up right 
 
 ### Link previews
 
-`src/pages/index.astro` sets Open Graph / Twitter tags with `public/og-image.jpg` (1200×630). Crawlers don't run JS, so links with `?q=` get different copy from nginx instead: a `map $arg_q` picks a fixed "👀 Mira esta ecuación que resolví en 3D" title/description and `sub_filter` swaps it in on `/projects/algebra-3d/`. The query is never written into the HTML. `sub_filter` matches the exact `shareTitle`/`shareText` strings, so update the nginx config if you change them.
+`src/pages/index.astro` sets Open Graph / Twitter tags with `public/og-image.jpg` (1200×630). Crawlers don't run JS, so every shared link gets the same preview, including links with `?q=`.
 
 ## Layout
 

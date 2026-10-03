@@ -2,10 +2,8 @@
 import App from '../components/App.tsx';
 import '../styles/global.css';
 
-// Link previews (WhatsApp, Telegram, X…). Crawlers don't run JS, so these are static.
-// nginx swaps shareTitle/shareText for "look at this equation" copy when the link has ?q=
-// (sub_filter matches these exact strings; see README "Link previews"). No og:url on purpose:
-// some crawlers re-fetch og:url and would lose the ?q= variant.
+// Link previews (WhatsApp, Telegram, X…). Crawlers don't run JS, so every link, with or
+// without ?q=, gets this same preview.
 const pageUrl = new URL(`${import.meta.env.BASE_URL}/`, Astro.site).href;
 const ogImage = new URL(`${import.meta.env.BASE_URL}/og-image.jpg`, Astro.site).href;
 const shareTitle = '🤯 ¿Puedes resolver esta ecuación? | Álgebra 3D';
