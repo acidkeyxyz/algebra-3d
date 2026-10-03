@@ -165,7 +165,7 @@ kbd {
 @media (max-width: 720px) {
   .brand p { display: none; }
   .legend { display: none; }
-  .kind { max-width: 100%; font-size: 14px; }
+  .kind { display: none; } /* the step card already shows the formula */
   .hud-top { flex-direction: column; }
   .card { padding: 10px 12px; max-height: 55%; }
   .card h2 { font-size: 17px; }
@@ -318,6 +318,7 @@ kbd {
   .help-table > div { grid-template-columns: 1fr; gap: 2px; }
   .help-btn { padding: 0 6px; }
   .help-btn { font-size: 0; gap: 0; }
+  .help-btn span { font-size: 15px; } /* the label hides, the "?" must not */
   .modal-backdrop { padding: 8px; }
   .modal { max-height: calc(100dvh - 16px); border-radius: 14px; }
 }
