@@ -1,0 +1,28 @@
+{
+  "name": "algebra-3d",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev --host",
+    "build": "astro build",
+    "preview": "astro preview --host",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@astrojs/preact": "^5.0.1",
+    "astro": "^6.0.5",
+    "katex": "^0.19.0",
+    "preact": "^10.29.8",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.8",
+    "@types/three": "^0.186.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

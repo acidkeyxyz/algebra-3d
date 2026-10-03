@@ -1,0 +1,18 @@
+---
+import App from '../components/App.tsx';
+import '../styles/global.css';
+---
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Aprende álgebra en 3D: escribe una ecuación y mírala resolverse paso a paso con bloques, balanzas y gráficas." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>∑</text></svg>" />
+    <title>Álgebra 3D</title>
+  </head>
+  <body>
+    <App client:only="preact" />
+    <noscript>Algebra 3D needs JavaScript and WebGL.</noscript>
+  </body>
+</html>
