@@ -34,3 +34,13 @@ npm run build    # static site in dist/
 - `src/lib/i18n.ts` has the language state and UI strings.
 - `src/lib/system.ts` handles systems of equations (substitution, circle subtraction, numeric fallback).
 - `src/lib/generate.ts` builds random formulas from their answers; `src/lib/favorites.ts` stores starred formulas.
+
+## Contributing
+
+Contributions are welcome. Open an issue or a pull request.
+
+## License
+
+Copyright (C) 2026 Luis Mendoza
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE) for the full text.

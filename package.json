@@ -3,6 +3,8 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
+  "author": "Luis Mendoza",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "astro dev --host",
     "build": "astro build",
