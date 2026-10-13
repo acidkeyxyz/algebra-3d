@@ -8,6 +8,7 @@ import MathTex from './Math';
 import LangSwitch from './LangSwitch';
 import ExampleList from './ExampleList';
 import HelpModal from './HelpModal';
+import Learn from './Learn';
 import { loadFavorites, saveFavorites, toggleFav, isFav } from '../lib/favorites';
 import type { Example } from '../lib/generate';
 import { LANGS, UI, loadLang, saveLang, type Lang } from '../lib/i18n';
@@ -55,7 +56,30 @@ function initialQuery(): string {
   return 'x^3 + 3x^2 = 0';
 }
 
+type Mode = 'learn' | 'solver';
+const MODE_KEY = 'algebra3d.mode';
+
+function initialMode(): Mode {
+  try {
+    if (new URLSearchParams(location.search).get('q')) return 'solver'; // shared formula links open the solver
+    const m = localStorage.getItem(MODE_KEY);
+    if (m === 'learn' || m === 'solver') return m;
+  } catch {
+    /* ignore */
+  }
+  return 'learn';
+}
+
 export default function App() {
+  const [mode, setModeState] = useState<Mode>(initialMode);
+  const setMode = (m: Mode) => {
+    setModeState(m);
+    try {
+      localStorage.setItem(MODE_KEY, m);
+    } catch {
+      /* ignore */
+    }
+  };
   const [input, setInput] = useState(initialQuery);
   const [query, setQuery] = useState(initialQuery);
   const [stepIdx, setStepIdx] = useState(0);
@@ -133,6 +157,7 @@ export default function App() {
 
   // ← → to move between steps (outside the text box).
   useEffect(() => {
+    if (mode !== 'solver') return;
     const onKey = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') move(1);
@@ -146,7 +171,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [go, move, last]);
+  }, [go, move, last, mode]);
 
   // Autoplay through the steps.
   useEffect(() => {
@@ -159,9 +184,15 @@ export default function App() {
     return () => clearTimeout(t);
   }, [playing, stepIdx, last, go]);
 
+  /** From the learning game: open the 3D solver, optionally on one equation. */
+  const openSolver = (q?: string) => {
+    setMode('solver');
+    if (q) submit(q);
+  };
+
   const cam = (name: CameraPreset) => setPreset((p) => ({ name, n: p.n + 1 }));
 
-  return (
+  const solver = (
     <div class={`app${expanded ? ` x-${expanded}` : ''}`}>
       <header class="top">
         <button type="button" class="expand-btn top-expand" onClick={() => expand('input')} title={t.expandInput} aria-label={t.expandInput}>
@@ -208,6 +239,9 @@ export default function App() {
         </button>
         <div class="top-right">
           <LangSwitch lang={lang} onChange={setLang} label={t.language} />
+          <button type="button" class="learn-btn" onClick={() => setMode('learn')} title={t.learnMode}>
+            <span aria-hidden="true">🎮</span> {t.learnMode}
+          </button>
           <button type="button" class="help-btn" onClick={() => setGuideOpen(true)} aria-haspopup="dialog" title={t.helpGuide}>
             <span aria-hidden="true">?</span> {t.helpGuide}
           </button>
@@ -347,5 +381,14 @@ export default function App() {
         />
       )}
     </div>
+  );
+
+  return (
+    <>
+      <div class="learn-host" hidden={mode !== 'learn'}>
+        <Learn lang={lang} onLang={setLang} onSolver={openSolver} />
+      </div>
+      {mode === 'solver' && solver}
+    </>
   );
 }

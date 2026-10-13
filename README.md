@@ -2,7 +2,10 @@
 
 # Álgebra 3D
 
-Interactive algebra for students aged 13–16. Type an equation and watch it solved step by step in a 3D scene:
+Math for students aged 8–16, in two modes:
+
+- **🎮 Learn (ages 8–13)**: a gamified path of 36 levels in five tracks (add & subtract, multiply, divide, fractions & %, algebra). Pick your age and each track starts at the right level. See [Learning path](#learning-path).
+- **🧮 3D solver (ages 13–16)**: type an equation and watch it solved step by step in a 3D scene:
 
 - **Balance scale with algebra blocks** for linear equations (x³ cubes, x² flats, x rods, y rods, unit cubes; red = negative). Blocks drop in, cancel as zero pairs, and split into equal groups when dividing.
 - **Area / volume models** for factoring: `x² + 5x + 6` assembles into an (x + 2)(x + 3) rectangle, and `x³ + 3x²` stacks into an x · x · (x + 3) box.
@@ -15,6 +18,25 @@ Interactive algebra for students aged 13–16. Type an equation and watch it sol
 - **Languages**: Spanish (Mexico) by default; the ES/EN switch in the header changes to English (US). The choice is remembered (`?lang=en` also works).
 - **Mobile layout**: on screens up to 720px wide, expand buttons open the formula and examples, the 3D canvas, or the step card full screen, and a floating ✕ button at the bottom closes it. The formula badge over the canvas is hidden there, since the step card already shows it.
 - **Sharing**: links (including `?q=` links) show a preview with `public/og-image.jpg`. See [Link previews](#link-previews).
+
+## Learning path
+
+The first screen asks for the child's age (8–13). Each age maps to a school grade (US grade = age − 5; Mexico 3º primaria to 2º secundaria) and starts every track at the level expected for that grade; earlier levels stay open as review.
+
+| Age | Add / subtract | Multiply | Divide | Fractions & % | Algebra |
+|---|---|---|---|---|---|
+| 8 | to 100, to 1,000 | tables 2, 5, 10, then 3, 4 | sharing into 2, 5, 10 | naming slices | missing number `? + 7 = 12` |
+| 9 | to 100,000 | all tables, 2 digits × 1 | facts, 2–3 digits ÷ 1, remainders | of a number, equivalent, same denominator | `x + 7 = 12` |
+| 10 | decimals | 2 × 2 digits | ÷ 2 digits | unlike denominators, × fractions | order of operations |
+| 11 | negative numbers | decimals × whole | decimals ÷ whole | percent | `3x = 12`, evaluate expressions |
+| 12 | integers | signed products | – | ratios and proportions | `3x + 4 = 19` |
+| 13 | – | – | – | – | `5x + 3 = 2x + 12`, `3(x + 2) = 15`, then the 3D solver |
+
+Add `?test=true` to the URL to open every level (a purple TEST badge shows in the header).
+
+Game rules: 10 questions per round, 5 hearts (a mistake costs one), 3 ★ for at most 1 mistake, 2 ★ for 2–3, 1 ★ for 4. A level opens when the one before has at least 1 ★. XP grows with answer streaks and star bonuses, ranks go from Apprentice to Legend, 10 badges, and a daily streak. Everything is saved in localStorage. Algebra questions have a **See it in 3D** button that opens the same equation in the solver. Questions are bilingual and each carries an explanation shown after a mistake.
+
+The grade expectations come from the Common Core grade 3–8 standards (operations, fractions, ratios, expressions and equations) and the SEP primary and secondary programs, written from memory rather than checked against the documents.
 
 ## Stack
 
@@ -57,6 +79,7 @@ nginx serves the fanpage.me folder as static files, so new builds show up right 
 - `src/components/` contains the Preact UI (`App`, `Viewer`, `LangSwitch`, KaTeX `Math`).
 - `src/lib/i18n.ts` has the language state and UI strings.
 - `src/lib/system.ts` handles systems of equations (substitution, circle subtraction, numeric fallback).
+- `src/lib/learn.ts` has the levels, age map and question generators for Learn mode; `src/lib/progress.ts` has XP, ranks, stars and badges; `src/components/Learn.tsx` is the game UI.
 - `src/lib/generate.ts` builds random formulas from their answers; `src/lib/favorites.ts` stores starred formulas.
 
 ## Contributing
