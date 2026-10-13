@@ -19,6 +19,7 @@ import {
   type RoundResult,
 } from '../lib/progress';
 import type { Lang } from '../lib/i18n';
+import { isMuted, playCorrect, setMuted } from '../lib/sound';
 
 const S = {
   en: {
@@ -50,6 +51,8 @@ const S = {
     wrong: 'Not quite',
     answerWas: 'The answer is',
     see3d: '🔭 See it in 3D',
+    soundOn: 'Turn sound on',
+    soundOff: 'Turn sound off',
     seeWhy: "Let's see why",
     replay: '↻ Replay',
     combo: 'in a row',
@@ -101,6 +104,8 @@ const S = {
     wrong: 'Casi',
     answerWas: 'La respuesta es',
     see3d: '🔭 Verlo en 3D',
+    soundOn: 'Activar sonido',
+    soundOff: 'Silenciar',
     seeWhy: 'Veamos por qué',
     replay: '↻ Repetir',
     combo: 'seguidas',
@@ -146,6 +151,7 @@ export default function Learn({ lang, onLang, onSolver }: { lang: Lang; onLang: 
   const [track, setTrack] = useState<TrackId>('add');
   const root = useRef<HTMLDivElement>(null);
   const rounds = useRef(0);
+  const [muted, setMutedState] = useState(isMuted);
   const start = (level: Level) => setScreen({ name: 'round', level, id: ++rounds.current });
 
   const update = (p: Progress) => {
@@ -172,6 +178,20 @@ export default function Learn({ lang, onLang, onSolver }: { lang: Lang; onLang: 
         </div>
         <div class="top-right">
           <LangSwitch lang={lang} onChange={onLang} label={lang === 'es' ? 'Idioma' : 'Language'} />
+          <button
+            type="button"
+            class="sound-btn"
+            aria-pressed={!muted}
+            title={muted ? t.soundOn : t.soundOff}
+            aria-label={muted ? t.soundOn : t.soundOff}
+            onClick={() => {
+              setMuted(!muted);
+              setMutedState(!muted);
+              if (muted) playCorrect(0);
+            }}
+          >
+            {muted ? '🔇' : '🔊'}
+          </button>
           <button type="button" class="solver-btn" onClick={() => onSolver()}>
             {t.solver}
           </button>
@@ -497,6 +517,7 @@ function Round({ lang, level, onQuit, onFinish, on3D }: { lang: Lang; level: Lev
   const submit = (given: string) => {
     if (fb || !given.trim()) return;
     if (isCorrect(q, given)) {
+      playCorrect(combo);
       const gain = xpForAnswer(combo);
       setXp((x) => x + gain);
       setCombo((c) => c + 1);

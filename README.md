@@ -34,7 +34,7 @@ The first screen asks for the child's age (8–13). Each age maps to a school gr
 
 Add `?test=true` to the URL to open every level (a purple TEST badge shows in the header).
 
-Game rules: 10 questions per round, 5 hearts (a mistake costs one), 3 ★ for at most 1 mistake, 2 ★ for 2–3, 1 ★ for 4. A level opens when the one before has at least 1 ★. XP grows with answer streaks and star bonuses, ranks go from Apprentice to Legend, 10 badges, and a daily streak. Everything is saved in localStorage. Algebra questions have a **See it in 3D** button that opens the same equation in the solver. Questions are bilingual and each carries an explanation shown after a mistake.
+Game rules: 10 questions per round, 5 hearts (a mistake costs one), 3 ★ for at most 1 mistake, 2 ★ for 2–3, 1 ★ for 4. A level opens when the one before has at least 1 ★. XP grows with answer streaks and star bonuses, ranks go from Apprentice to Legend, 10 badges, and a daily streak. A synthesized "ding" plays on correct answers (mute button in the header). Everything is saved in localStorage. Algebra questions have a **See it in 3D** button that opens the same equation in the solver. Questions are bilingual and each carries an explanation shown after a mistake.
 
 The grade expectations come from the Common Core grade 3–8 standards (operations, fractions, ratios, expressions and equations) and the SEP primary and secondary programs, written from memory rather than checked against the documents.
 

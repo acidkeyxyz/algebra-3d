@@ -599,3 +599,5 @@ kbd {
 .vis-area .box small { color: #dbeafe; font-size: 13px; }
 .vis-area .box b { font-size: 22px; }
 .ln-test { padding: 2px 10px; border-radius: 999px; background: #7c3aed; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; }
+.sound-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: #020617; font-size: 18px; flex: none; }
+.sound-btn:hover { border-color: var(--accent); }
