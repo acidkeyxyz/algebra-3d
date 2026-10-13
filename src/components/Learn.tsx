@@ -511,6 +511,19 @@ function Round({ lang, level, onQuit, onFinish, on3D }: { lang: Lang; level: Lev
   const [replay, setReplay] = useState(0);
   const [fb, setFb] = useState<null | { ok: boolean; gain: number; praise: string; picked?: string }>(null);
   const q: Question = qs[i];
+  const fbRef = useRef<HTMLDivElement>(null);
+
+  // Phones: after a wrong answer, bring the explanation into view.
+  useEffect(() => {
+    if (!fb || fb.ok || !fbRef.current) return;
+    try {
+      if (!window.matchMedia('(max-width: 720px)').matches) return;
+      const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      fbRef.current.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+    } catch {
+      /* ignore */
+    }
+  }, [fb]);
   const mistakes = HEARTS - hearts;
   const last = i === qs.length - 1;
 
@@ -628,7 +641,7 @@ function Round({ lang, level, onQuit, onFinish, on3D }: { lang: Lang; level: Lev
       </div>
 
       {fb && (
-        <div class={`ln-fb ${fb.ok ? 'ok' : 'no'}`} role="status">
+        <div class={`ln-fb ${fb.ok ? 'ok' : 'no'}`} role="status" ref={fbRef}>
           <div class="ln-fb-head">
             <span class="face">{fb.ok ? '🎉' : '💡'}</span>
             <b>{fb.praise}</b>
