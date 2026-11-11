@@ -1,6 +1,6 @@
 import type { Lang } from '../lib/i18n';
 
-const AUTHOR_URL = 'https://github.com/acidkeyxyz';
+const AUTHOR_URL = 'https://acidkey.xyz';
 const REPO_URL = 'https://github.com/acidkeyxyz/algebra-3d';
 
 export default function Footer({ lang }: { lang: Lang }) {
