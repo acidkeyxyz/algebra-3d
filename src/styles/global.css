@@ -23,7 +23,8 @@ button:disabled { opacity: 0.35; cursor: default; }
 /* ---------- header ---------- */
 .top {
   display: flex; gap: 16px; align-items: center; justify-content: space-between;
-  padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel-solid);
+  padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left));
+  border-bottom: 1px solid var(--line); background: var(--panel-solid);
   flex-wrap: wrap;
 }
 .brand { display: flex; gap: 10px; align-items: center; }
@@ -332,7 +333,7 @@ kbd {
   }
   .expand-btn svg { width: 20px; height: 20px; }
   .expand-btn:active { background: #0c4a6e; }
-  .top-expand { position: absolute; top: 10px; right: 16px; }
+  .top-expand { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 16px; }
   .count { display: flex; align-items: center; justify-content: center; gap: 10px; }
   .close-expanded {
     display: block; position: fixed; z-index: 90; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom));
@@ -346,6 +347,8 @@ kbd {
   .x-input .side { position: static; transform: none; width: 100%; box-shadow: none; border-right: 0; padding-bottom: 76px; }
 
   /* 3D canvas: nothing but the scene and its camera buttons. */
+  /* The header is hidden here, so keep the scene clear of the iOS status bar / notch. */
+  .x-stage, .x-steps { padding-top: env(safe-area-inset-top); }
   .x-stage .top, .x-stage .card { display: none; }
 
   /* Steps: the card covers the whole screen. */
@@ -370,7 +373,8 @@ kbd {
 .ln { height: 100%; overflow-y: auto; scrollbar-width: thin; background: radial-gradient(1200px 500px at 50% -10%, #17264a 0%, var(--bg) 70%); }
 .ln-top {
   position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  padding: 10px 16px; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
+  padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left));
+  background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
 }
 .solver-btn {
   height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: #020617; font-weight: 700; font-size: 14px;
