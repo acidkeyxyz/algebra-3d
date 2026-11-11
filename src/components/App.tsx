@@ -5,6 +5,7 @@ import type { Solution } from '../lib/scene';
 import type { CameraPreset } from '../three/Stage';
 import Viewer from './Viewer';
 import MathTex from './Math';
+import Footer from './Footer';
 import LangSwitch from './LangSwitch';
 import ExampleList from './ExampleList';
 import HelpModal from './HelpModal';
@@ -365,6 +366,7 @@ export default function App() {
         )}
       </main>
       </div>
+      <Footer lang={lang} />
       {expanded && (
         <button type="button" class="close-expanded" onClick={() => setExpanded(null)}>
           ✕ {t.closeExpanded}

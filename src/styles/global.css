@@ -602,3 +602,12 @@ kbd {
 .sound-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: #020617; font-size: 18px; flex: none; }
 .sound-btn:hover { border-color: var(--accent); }
 .ln-fb { scroll-margin-top: 62px; }
+
+/* ---------- footer ---------- */
+.site-footer {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 6px 16px;
+  font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); background: var(--panel-solid);
+}
+.site-footer a { color: var(--accent); text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
+.ln .site-footer { background: transparent; margin-top: 8px; }

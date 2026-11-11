@@ -1,6 +1,7 @@
 import { Fragment } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import MathTex from './Math';
+import Footer from './Footer';
 import LangSwitch from './LangSwitch';
 import { AGES, AGE_INFO, HEARTS, ROUND_LENGTH, TRACKS, fracTex, isCorrect, levelsOf, makeRound, type Level, type Question, type TrackId, type Visual } from '../lib/learn';
 import {
@@ -233,6 +234,7 @@ export default function Learn({ lang, onLang, onSolver }: { lang: Lang; onLang: 
           }}
         />
       )}
+      <Footer lang={lang} />
     </div>
   );
 }
