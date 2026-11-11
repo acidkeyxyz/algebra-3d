@@ -200,7 +200,7 @@ export default function App() {
           <ExpandIcon />
         </button>
         <div class="brand">
-          <span class="logo">∑</span>
+          <img class="logo" src={`${import.meta.env.BASE_URL}/logo-120.webp`} alt="" width="40" height="40" />
           <div>
             <h1>{lang === 'es' ? 'Álgebra 3D' : 'Algebra 3D'}</h1>
             <p>{t.tagline}</p>

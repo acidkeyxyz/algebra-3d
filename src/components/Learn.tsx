@@ -187,7 +187,7 @@ export default function Learn({ lang, onLang, onSolver }: { lang: Lang; onLang: 
     <div class="ln" ref={root}>
       <header class="ln-top">
         <div class="brand">
-          <span class="logo">∑</span>
+          <img class="logo" src={`${import.meta.env.BASE_URL}/logo-120.webp`} alt="" width="40" height="40" />
           <h1>{t.appName}</h1>
           {TEST_MODE && <span class="ln-test">🧪 TEST</span>}
         </div>
