@@ -10,6 +10,8 @@ import {
   levelStates,
   loadProgress,
   nextLevel,
+  rachaState,
+  useComodin,
   rankOf,
   recordRound,
   saveProgress,
@@ -41,6 +43,12 @@ const S = {
     toNext: 'to',
     maxRank: 'Top rank!',
     dayStreak: 'day streak',
+    rachaRisk: "Don't lose your streak! Pass a round today.",
+    rachaDone: (n: number) => `Your streak is ${n} ${n === 1 ? 'day' : 'days'}`,
+    rachaStart: 'Pass a round today to start your streak.',
+    rachaBroken: (n: number) => `You lost your ${n}-day streak.`,
+    comodin: 'Use a joker',
+    comodinsLeft: (n: number) => `Jokers left: ${n}`,
     stars: 'stars',
     badges: 'Badges',
     quit: 'Quit round',
@@ -94,6 +102,12 @@ const S = {
     toNext: 'para',
     maxRank: '¡Rango máximo!',
     dayStreak: 'días seguidos',
+    rachaRisk: '¡No pierdas la racha! Pasa una ronda hoy.',
+    rachaDone: (n: number) => `Tu racha es de ${n} ${n === 1 ? 'día' : 'días'}`,
+    rachaStart: 'Pasa una ronda hoy para empezar tu racha.',
+    rachaBroken: (n: number) => `Perdiste tu racha de ${n} ${n === 1 ? 'día' : 'días'}.`,
+    comodin: 'Usar comodín',
+    comodinsLeft: (n: number) => `Comodines: ${n}`,
     stars: 'estrellas',
     badges: 'Insignias',
     quit: 'Salir de la ronda',
@@ -203,7 +217,7 @@ export default function Learn({ lang, onLang, onSolver }: { lang: Lang; onLang: 
         (progress.age == null ? (
           <Welcome lang={lang} onPick={(age) => update({ ...progress, age })} />
         ) : (
-          <Home lang={lang} progress={progress} track={track} setTrack={setTrack} setAge={(age) => update({ ...progress, age })} onPlay={start} />
+          <Home lang={lang} progress={progress} track={track} setTrack={setTrack} setAge={(age) => update({ ...progress, age })} setProgress={update} onPlay={start} />
         ))}
 
       {screen.name === 'round' && (
@@ -274,6 +288,7 @@ function Home({
   track,
   setTrack,
   setAge,
+  setProgress,
   onPlay,
 }: {
   lang: Lang;
@@ -281,6 +296,7 @@ function Home({
   track: TrackId;
   setTrack: (t: TrackId) => void;
   setAge: (a: number) => void;
+  setProgress: (p: Progress) => void;
   onPlay: (l: Level) => void;
 }) {
   const t = S[lang];
@@ -291,8 +307,29 @@ function Home({
   const cur = TRACKS.find((x) => x.id === track)!;
   const [openBadge, setOpenBadge] = useState<string | null>(null);
 
+  const racha = rachaState(progress);
+
   return (
     <main class="ln-main">
+      <section class={`ln-racha ${racha.status}`} role="status">
+        <span aria-hidden="true">🔥</span>
+        <div>
+          <b>
+            {racha.status === 'done' && t.rachaDone(racha.days)}
+            {racha.status === 'risk' && t.rachaRisk}
+            {racha.status === 'none' && t.rachaStart}
+            {racha.status === 'broken' && t.rachaBroken(racha.lost)}
+          </b>
+          {racha.status === 'risk' && <div class="ln-racha-sub">{t.rachaDone(racha.days)}</div>}
+          <div class="ln-racha-sub">🃏 {t.comodinsLeft(progress.comodines)}</div>
+        </div>
+        {racha.status === 'broken' && racha.canRestore && (
+          <button type="button" class="ln-racha-btn" onClick={() => setProgress(useComodin(progress))}>
+            🃏 {t.comodin}
+          </button>
+        )}
+      </section>
+
       <section class="ln-hero">
         <div class="ln-rank" aria-hidden="true">{rank.emoji}</div>
         <div class="ln-hero-body">
@@ -308,7 +345,7 @@ function Home({
           </div>
         </div>
         <div class="ln-stats">
-          <span title={t.dayStreak}>🔥 <b>{progress.days}</b> <small>{t.dayStreak}</small></span>
+          <span title={t.dayStreak}>🔥 <b>{racha.status === 'broken' || racha.status === 'none' ? 0 : racha.days}</b> <small>{t.dayStreak}</small></span>
           <span title={t.stars}>⭐ <b>{totalStars(progress)}</b> <small>{t.stars}</small></span>
         </div>
       </section>

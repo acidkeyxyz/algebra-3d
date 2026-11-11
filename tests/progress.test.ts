@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emptyProgress, levelStates, nextDays, rankOf, recordRound, xpForAnswer, BADGES } from '../src/lib/progress';
+import { emptyProgress, levelStates, nextDays, rachaState, rankOf, recordRound, useComodin, xpForAnswer, BADGES } from '../src/lib/progress';
 import { LEVELS, levelById, levelsOf } from '../src/lib/learn';
 
 const add1 = levelById('add1')!;
@@ -86,5 +86,19 @@ describe('test mode', () => {
     const s = levelStates({ ...emptyProgress(), age: 8 }, 'mul', true);
     expect(Object.values(s)).not.toContain('locked');
     expect(Object.values(levelStates({ ...emptyProgress(), age: 8 }, 'mul'))).toContain('locked');
+  });
+
+  it('racha: only passed rounds count; a missed day breaks it; a comodín restores it', () => {
+    const lose = recordRound(emptyProgress(), add1, { mistakes: 5, maxCombo: 0, xp: 0 }, '2026-10-12');
+    expect(lose.progress.days).toBe(0);
+    const base = { ...emptyProgress(), days: 4, lastDay: '2026-10-12' };
+    expect(rachaState(base, '2026-10-12')).toEqual({ status: 'done', days: 4 });
+    expect(rachaState(base, '2026-10-13')).toEqual({ status: 'risk', days: 4 });
+    expect(rachaState(base, '2026-10-15')).toEqual({ status: 'broken', lost: 4, canRestore: true });
+    const back = useComodin(base, '2026-10-15');
+    expect(back.comodines).toBe(2);
+    expect(rachaState(back, '2026-10-15')).toEqual({ status: 'risk', days: 4 });
+    expect(useComodin(base, '2026-10-13')).toBe(base); // not broken: nothing spent
+    expect(useComodin({ ...base, comodines: 0 }, '2026-10-15').comodines).toBe(0);
   });
 });

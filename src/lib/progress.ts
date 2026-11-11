@@ -8,11 +8,14 @@ export interface Progress {
   xp: number;
   stars: Record<string, number>; // best stars per level id
   badges: string[];
-  days: number; // days in a row with a round played
-  lastDay: string; // YYYY-MM-DD
+  days: number; // days in a row with a passed round (kept after a break so a comodín can restore it)
+  lastDay: string; // YYYY-MM-DD of the last passed round
+  comodines: number; // jokers left to restore a broken racha; never refilled
 }
 
-export const emptyProgress = (): Progress => ({ age: null, xp: 0, stars: {}, badges: [], days: 0, lastDay: '' });
+export const COMODINES = 3;
+
+export const emptyProgress = (): Progress => ({ age: null, xp: 0, stars: {}, badges: [], days: 0, lastDay: '', comodines: COMODINES });
 
 const KEY = 'algebra3d.progress';
 
@@ -32,6 +35,7 @@ export function loadProgress(): Progress {
       if (Array.isArray(raw.badges)) p.badges = raw.badges.filter((b: unknown) => typeof b === 'string');
       if (typeof raw.days === 'number') p.days = raw.days;
       if (typeof raw.lastDay === 'string') p.lastDay = raw.lastDay;
+      if (typeof raw.comodines === 'number') p.comodines = Math.min(COMODINES, Math.max(0, Math.floor(raw.comodines)));
       return p;
     }
   } catch {
@@ -144,11 +148,34 @@ export interface RoundOutcome {
 const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 export const today = () => dayKey(new Date());
 
+const prevDay = (day: string) => {
+  const [y, m, d] = day.split('-').map(Number);
+  return dayKey(new Date(y, m - 1, d - 1));
+};
+
+export type RachaState =
+  | { status: 'none' } // never passed a round
+  | { status: 'done'; days: number } // already passed today
+  | { status: 'risk'; days: number } // passed yesterday; pass one today to keep it
+  | { status: 'broken'; lost: number; canRestore: boolean }; // missed a day; shown as 0
+
+export function rachaState(p: Progress, day = today()): RachaState {
+  if (!p.lastDay || p.days <= 0) return { status: 'none' };
+  if (p.lastDay === day) return { status: 'done', days: p.days };
+  if (p.lastDay === prevDay(day)) return { status: 'risk', days: p.days };
+  return { status: 'broken', lost: p.days, canRestore: p.comodines > 0 };
+}
+
+/** Spend one comodín to bring a broken racha back (it then needs a pass today to continue). */
+export function useComodin(p: Progress, day = today()): Progress {
+  const s = rachaState(p, day);
+  if (s.status !== 'broken' || p.comodines <= 0) return p;
+  return { ...p, comodines: p.comodines - 1, lastDay: prevDay(day) };
+}
+
 export function nextDays(p: Progress, day: string): number {
   if (p.lastDay === day) return p.days;
-  const [y, m, d] = day.split('-').map(Number);
-  const yesterday = dayKey(new Date(y, m - 1, d - 1));
-  return p.lastDay === yesterday ? p.days + 1 : 1;
+  return p.lastDay === prevDay(day) ? p.days + 1 : 1;
 }
 
 export function recordRound(p: Progress, level: Level, r: RoundResult, day = today()): RoundOutcome {
@@ -161,8 +188,9 @@ export function recordRound(p: Progress, level: Level, r: RoundResult, day = tod
     xp: p.xp + xpTotal,
     stars: { ...p.stars },
     badges: [...p.badges],
-    days: nextDays(p, day),
-    lastDay: day,
+    // Only a passed round (at least 1 star) counts for the racha.
+    days: stars >= 1 ? nextDays(p, day) : p.days,
+    lastDay: stars >= 1 ? day : p.lastDay,
   };
   const newBest = stars > (p.stars[level.id] ?? 0);
   if (newBest) next.stars[level.id] = stars;
