@@ -487,8 +487,14 @@ kbd {
 }
 .ln-keypad .k:active { transform: translateY(2px); box-shadow: none; }
 .ln-keypad .k.alt { background: #1e293b; color: #cbd5e1; }
-.ln-keypad .k.ok { grid-column: 1 / -1; background: linear-gradient(135deg, #16a34a, #22c55e); color: #052e16; font-size: 20px; box-shadow: 0 3px 0 #14532d; }
-.ln-keypad .k.ok:disabled { background: #1e293b; color: var(--muted); box-shadow: none; }
+/* Comprobar / Continuar stay pinned to the bottom of the screen, even when the question or explanation is tall. */
+.ln-okbar, .ln-fb-actions { position: sticky; bottom: 0; z-index: 5; }
+.ln-okbar { margin: 0 -12px -40px; padding: 10px 12px calc(14px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--bg) 70%, transparent); }
+.ln-ok {
+  display: block; width: min(320px, 100%); margin: 0 auto; height: 56px; border-radius: 14px; border: 1px solid var(--line);
+  background: linear-gradient(135deg, #16a34a, #22c55e); color: #052e16; font-size: 20px; font-weight: 800; box-shadow: 0 3px 0 #14532d;
+}
+.ln-ok:disabled { background: #1e293b; color: var(--muted); box-shadow: none; }
 
 .ln-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
 .ln-choice {
@@ -510,7 +516,8 @@ kbd {
 .ln-fb-head { display: flex; align-items: center; gap: 10px; font-size: 20px; }
 .ln-fb-head .face { font-size: 28px; }
 .ln-fb-head .gain { margin-left: auto; font-size: 15px; color: #86efac; font-weight: 800; }
-.ln-fb-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.ln-fb-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; padding: 8px 0 2px; background: linear-gradient(to top, var(--fb-bg, #2a1d0a) 75%, transparent); }
+.ln-fb.ok { --fb-bg: #0b2a17; }
 
 /* vis: dots, groups, pie */
 .vis-array { display: grid; gap: 5px; padding: 8px 10px; border-radius: 12px; background: #0b1426; max-width: 100%; }

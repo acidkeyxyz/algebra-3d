@@ -674,10 +674,16 @@ function Round({ lang, level, onQuit, onFinish, on3D }: { lang: Lang; level: Lev
             <div class={`ln-typed${fb ? (fb.ok ? ' right' : ' bad') : ''}`} aria-live="polite" aria-label={t.yourAnswer}>
               {typed ? typed.replace(/-/g, '−') : <span class="ph">?</span>}
             </div>
-            {!fb && <Keypad kind={level.input} onKey={press} onOk={() => submit(typed)} t={t} disabledOk={!typed || typed === '-'} />}
+            {!fb && <Keypad kind={level.input} onKey={press} t={t} />}
           </>
         )}
       </div>
+
+      {!fb && !q.choices && (
+        <div class="ln-okbar">
+          <button type="button" class="ln-ok" onClick={() => submit(typed)} disabled={!typed || typed === '-'}>{t.check}</button>
+        </div>
+      )}
 
       {fb && (
         <div class={`ln-fb ${fb.ok ? 'ok' : 'no'}`} role="status" ref={fbRef}>
@@ -719,7 +725,7 @@ function Round({ lang, level, onQuit, onFinish, on3D }: { lang: Lang; level: Lev
   );
 }
 
-function Keypad({ kind, onKey, onOk, t, disabledOk }: { kind: 'int' | 'dec' | 'signed'; onKey: (k: string) => void; onOk: () => void; t: (typeof S)['en']; disabledOk: boolean }) {
+function Keypad({ kind, onKey, t }: { kind: 'int' | 'dec' | 'signed'; onKey: (k: string) => void; t: (typeof S)['en'] }) {
   const d = (n: string) => (
     <button key={n} type="button" class="k" onClick={() => onKey(n)}>{n}</button>
   );
@@ -735,7 +741,6 @@ function Keypad({ kind, onKey, onOk, t, disabledOk }: { kind: 'int' | 'dec' | 's
       )}
       {d('0')}
       <button type="button" class="k alt" onClick={() => onKey('back')} aria-label={t.backspace}>⌫</button>
-      <button type="button" class="k ok" onClick={onOk} disabled={disabledOk}>{t.check}</button>
     </div>
   );
 }
