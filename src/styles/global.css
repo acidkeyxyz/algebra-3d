@@ -422,13 +422,14 @@ kbd {
 .ln-stats { display: grid; gap: 4px; font-size: 18px; }
 .ln-stats small { font-size: 11px; color: var(--muted); }
 
-.ln-tracks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px; }
+.ln-tracks { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
 .ln-track {
   display: grid; justify-items: center; gap: 1px; padding: 10px 4px; border-radius: 16px; border: 2px solid var(--line); background: #111c33;
   font-size: 13px; text-align: center; transition: transform 0.12s;
 }
 .ln-track .e { font-size: 26px; }
 .ln-track small { color: var(--muted); }
+.ln-track.solver { border-style: dashed; }
 .ln-track:hover { transform: translateY(-2px); }
 .ln-track.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, #0f172a); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent); }
 
@@ -551,7 +552,7 @@ kbd {
   .ln-main { padding: 12px 12px 40px; gap: 14px; }
   .ln-hero { grid-template-columns: auto 1fr; }
   .ln-stats { grid-column: 1 / -1; grid-auto-flow: column; justify-content: space-around; }
-  .ln-tracks { grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .ln-tracks { grid-template-columns: repeat(3, 1fr); gap: 5px; }
   .ln-track { padding: 8px 2px; font-size: 11px; }
   .ln-track b { font-weight: 700; }
   .ln-track .e { font-size: 22px; }

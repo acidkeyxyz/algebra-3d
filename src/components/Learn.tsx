@@ -27,7 +27,8 @@ import { isMuted, playCorrect, setMuted } from '../lib/sound';
 const S = {
   en: {
     appName: 'Algebra 3D',
-    solver: '🧮 3D solver',
+    solver: '3D solver',
+    solverSub: 'Any equation',
     welcome: 'Hi! Ready to level up your math?',
     howOld: 'How old are you?',
     howOldHint: 'We pick the right starting point for you. You can change it any time.',
@@ -86,7 +87,8 @@ const S = {
   },
   es: {
     appName: 'Álgebra 3D',
-    solver: '🧮 Solucionador 3D',
+    solver: 'Solucionador 3D',
+    solverSub: 'Cualquier ecuación',
     welcome: '¡Hola! ¿Listo para subir de nivel en mates?',
     howOld: '¿Cuántos años tienes?',
     howOldHint: 'Elegimos el mejor punto de partida para ti. Puedes cambiarlo cuando quieras.',
@@ -207,9 +209,6 @@ export default function Learn({ lang, onLang, onSolver }: { lang: Lang; onLang: 
           >
             {muted ? '🔇' : '🔊'}
           </button>
-          <button type="button" class="solver-btn" onClick={() => onSolver()}>
-            {t.solver}
-          </button>
         </div>
       </header>
 
@@ -217,7 +216,7 @@ export default function Learn({ lang, onLang, onSolver }: { lang: Lang; onLang: 
         (progress.age == null ? (
           <Welcome lang={lang} onPick={(age) => update({ ...progress, age })} />
         ) : (
-          <Home lang={lang} progress={progress} track={track} setTrack={setTrack} setAge={(age) => update({ ...progress, age })} setProgress={update} onPlay={start} />
+          <Home lang={lang} onSolver={() => onSolver()} progress={progress} track={track} setTrack={setTrack} setAge={(age) => update({ ...progress, age })} setProgress={update} onPlay={start} />
         ))}
 
       {screen.name === 'round' && (
@@ -284,6 +283,7 @@ function Welcome({ lang, onPick }: { lang: Lang; onPick: (a: number) => void }) 
 
 function Home({
   lang,
+  onSolver,
   progress,
   track,
   setTrack,
@@ -292,6 +292,7 @@ function Home({
   onPlay,
 }: {
   lang: Lang;
+  onSolver: () => void;
   progress: Progress;
   track: TrackId;
   setTrack: (t: TrackId) => void;
@@ -374,6 +375,11 @@ function Home({
               </button>
             );
           })}
+          <button type="button" class="ln-track solver" style="--c:#14b8a6" onClick={onSolver}>
+            <span class="e">🧮</span>
+            <b>{t.solver}</b>
+            <small>{t.solverSub}</small>
+          </button>
         </div>
 
         <div class="ln-path" style={`--c:${cur.color}`}>
