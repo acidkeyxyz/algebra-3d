@@ -9,9 +9,12 @@ interface Props {
   autoRotate: boolean;
   /** Height in px of the overlay covering the bottom of the view. */
   inset: number;
+  /** Spoken name of the 3D view, and the id of the element that describes the scene in text. */
+  label: string;
+  describedBy: string;
 }
 
-export default function Viewer({ view, preset, autoRotate, inset }: Props) {
+export default function Viewer({ view, preset, autoRotate, inset, label, describedBy }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const stage = useRef<Stage | null>(null);
   const first = useRef(true);
@@ -37,5 +40,9 @@ export default function Viewer({ view, preset, autoRotate, inset }: Props) {
 
   useEffect(() => stage.current?.setAutoRotate(autoRotate), [autoRotate]);
 
-  return <div class="viewer" ref={host} />;
+  // The canvas is a picture: the text description is what assistive tech reads. The wrapper is focusable
+  // so the keyboard camera (W A S D…) only listens while it has focus (WCAG 2.1.4).
+  return (
+    <div class="viewer" ref={host} tabIndex={0} role="group" aria-roledescription="3D" aria-label={label} aria-describedby={describedBy} />
+  );
 }

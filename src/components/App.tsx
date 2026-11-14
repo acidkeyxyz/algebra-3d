@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { solve } from '../lib/solver';
 import { buildView } from '../lib/view';
-import type { Solution } from '../lib/scene';
+import { COLORS, type Solution } from '../lib/scene';
 import type { CameraPreset } from '../three/Stage';
 import Viewer from './Viewer';
 import MathTex from './Math';
@@ -11,8 +11,9 @@ import ExampleList from './ExampleList';
 import HelpModal from './HelpModal';
 import Learn from './Learn';
 import { loadFavorites, saveFavorites, toggleFav, isFav } from '../lib/favorites';
-import type { Example } from '../lib/generate';
-import { LANGS, UI, loadLang, saveLang, type Lang } from '../lib/i18n';
+import { pretty, type Example } from '../lib/generate';
+import { LANGS, UI, loadLang, saveLang, setLang as setI18nLang, type Lang } from '../lib/i18n';
+import { describeScene, speakMath } from '../lib/a11y';
 
 const EXAMPLES: (Example & { label: string })[] = [
   { label: 'y = x + 2', q: 'y = x + 2', level: 'Line' },
@@ -88,7 +89,11 @@ export default function App() {
   const [autoRotate, setAutoRotate] = useState(false);
   const [preset, setPreset] = useState<{ name: CameraPreset; n: number }>({ name: 'step', n: 0 });
   const [help, setHelp] = useState(false);
-  const [lang, setLangState] = useState<Lang>(loadLang);
+  const [lang, setLangState] = useState<Lang>(() => {
+    const l = loadLang();
+    setI18nLang(l); // formulas speak the right language from the very first render
+    return l;
+  });
   const [favs, setFavs] = useState<Example[]>(loadFavorites);
   const [sideOpen, setSideOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
@@ -106,13 +111,15 @@ export default function App() {
   const t = UI[lang];
 
   const setLang = (l: Lang) => {
+    setI18nLang(l);
     setLangState(l);
     saveLang(l);
   };
   useEffect(() => {
     document.documentElement.lang = LANGS.find((x) => x.id === lang)!.locale;
-    document.title = lang === 'es' ? 'Álgebra 3D' : 'Algebra 3D';
-  }, [lang]);
+    const app = lang === 'es' ? 'Álgebra 3D' : 'Algebra 3D';
+    document.title = mode === 'solver' ? `${t.solverTitle} · ${app}` : app;
+  }, [lang, mode]);
 
   const result = useMemo((): { sol?: Solution; error?: string } => {
     try {
@@ -126,6 +133,14 @@ export default function App() {
   const step = steps[Math.min(stepIdx, steps.length - 1)];
   const view = useMemo(() => (step ? buildView(step.scene) : null), [step]);
   const last = steps.length - 1;
+  const sceneText = useMemo(() => describeScene(step?.scene, lang), [step, lang]);
+  // Spoken to screen readers whenever the step changes (polite live region).
+  const announcement = useMemo(() => {
+    if (!step || !sol) return '';
+    const idx = Math.min(stepIdx, last);
+    const end = idx === last ? ` ${t.spokenAnswer}: ${speakMath(sol.answer, lang)}.` : '';
+    return `${t.step} ${idx + 1} / ${steps.length}. ${step.title}. ${speakMath(step.latex, lang)}. ${step.text}${end}`;
+  }, [step, sol, stepIdx, lang]);
 
   const go = useCallback((i: number) => setStepIdx(Math.max(0, Math.min(last, i))), [last]);
   const move = useCallback((d: number) => setStepIdx((i) => Math.max(0, Math.min(last, i + d))), [last]);
@@ -160,7 +175,10 @@ export default function App() {
   useEffect(() => {
     if (mode !== 'solver') return;
     const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
+      const el = e.target as HTMLElement | null;
+      // Leave native behaviour alone for form fields, buttons, links and the dialog (Space/Enter activate buttons).
+      if (el?.closest('input, textarea, select, button, a, summary, [role="dialog"], [role="switch"], [role="slider"]')) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') move(1);
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') move(-1);
       else if (e.key === 'Home') go(0);
@@ -195,8 +213,11 @@ export default function App() {
 
   const solver = (
     <div class={`app${expanded ? ` x-${expanded}` : ''}`}>
+      <nav aria-label={t.skipToSteps}>
+        <a class="skip-link" href="#step-card" onClick={(e) => { e.preventDefault(); document.getElementById('step-card')?.focus(); }}>{t.skipToSteps}</a>
+      </nav>
       <header class="top">
-        <button type="button" class="expand-btn top-expand" onClick={() => expand('input')} title={t.expandInput} aria-label={t.expandInput}>
+        <button type="button" class="expand-btn top-expand" onClick={() => expand('input')} title={t.expandInput} aria-label={t.expandInput} aria-expanded={expanded === 'input'}>
           <ExpandIcon />
         </button>
         <div class="brand">
@@ -219,24 +240,30 @@ export default function App() {
             placeholder={t.placeholder}
             spellcheck={false}
             autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
             aria-label={t.equation}
+            aria-describedby="eq-hint"
+            aria-invalid={result.error ? true : undefined}
+            aria-errormessage={result.error ? 'eq-error' : undefined}
           />
+          <span id="eq-hint" class="sr-only">{t.equationHint}</span>
           <button
             type="button"
             class={`star big${isFav(favs, query) ? ' on' : ''}`}
             onClick={() => flipFav(EXAMPLES.find((e) => e.q === query) ?? { q: query, level: '' })}
             aria-pressed={isFav(favs, query)}
-            title={isFav(favs, query) ? t.unstar : t.star}
-            aria-label={isFav(favs, query) ? t.unstar : t.star}
+            title={t.star}
+            aria-label={`${t.favorite}: ${pretty(query)}`}
           >
-            {isFav(favs, query) ? '★' : '☆'}
+            <span aria-hidden="true">{isFav(favs, query) ? '★' : '☆'}</span>
           </button>
           <button type="submit" class="primary">
             {t.solve}
           </button>
         </form>
-        <button type="button" class={`side-toggle${sideOpen ? ' on' : ''}`} onClick={() => setSideOpen((o) => !o)} aria-expanded={sideOpen}>
-          ☰ {t.showExamples}
+        <button type="button" class={`side-toggle${sideOpen ? ' on' : ''}`} onClick={() => setSideOpen((o) => !o)} aria-expanded={sideOpen} aria-controls="examples-panel">
+          <span aria-hidden="true">☰</span> {t.showExamples}
         </button>
         <div class="top-right">
           <LangSwitch lang={lang} onChange={setLang} label={t.language} />
@@ -262,7 +289,9 @@ export default function App() {
         onToggleFav={flipFav}
       />
       <main class="stage-wrap">
-        <Viewer view={view} preset={preset} autoRotate={autoRotate} inset={inset} />
+        <Viewer view={view} preset={preset} autoRotate={autoRotate} inset={inset} label={`${t.viewLabel}. ${t.viewHint}`} describedBy="scene-desc" />
+        <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
+        <div id="scene-desc" class="sr-only">{t.sceneDescription}: {sceneText}</div>
 
         <div class="hud-top">
           {sol && (
@@ -271,22 +300,23 @@ export default function App() {
               <MathTex tex={sol.inputLatex} />
             </div>
           )}
-          <div class="cam">
-            <button title={t.camStep} onClick={() => cam('step')}>🎯</button>
-            <button title={t.frontTitle} onClick={() => cam('front')}>{t.front}</button>
-            <button title={t.topTitle} onClick={() => cam('top')}>{t.top}</button>
-            <button title={t.sideTitle} onClick={() => cam('side')}>{t.side}</button>
-            <button title={t.spin} class={autoRotate ? 'on' : ''} onClick={() => setAutoRotate((a) => !a)}>⟳</button>
-            <button title={t.helpTitle} class={help ? 'on' : ''} onClick={() => setHelp((h) => !h)}>?</button>
-            <button class="expand-btn" onClick={() => expand('stage')} title={t.expandStage} aria-label={t.expandStage}>
+          <div class="cam" role="group" aria-label={t.cameraGroup}>
+            <button type="button" title={t.camStep} aria-label={t.camStep} onClick={() => cam('step')}><span aria-hidden="true">🎯</span></button>
+            <button type="button" title={t.frontTitle} aria-label={t.frontTitle} onClick={() => cam('front')}>{t.front}</button>
+            <button type="button" title={t.topTitle} aria-label={t.topTitle} onClick={() => cam('top')}>{t.top}</button>
+            <button type="button" title={t.sideTitle} aria-label={t.sideTitle} onClick={() => cam('side')}>{t.side}</button>
+            <button type="button" title={t.spin} aria-label={t.spin} aria-pressed={autoRotate} class={autoRotate ? 'on' : ''} onClick={() => setAutoRotate((a) => !a)}><span aria-hidden="true">⟳</span></button>
+            <button type="button" title={t.helpTitle} aria-label={t.helpTitle} aria-expanded={help} aria-controls="controls-help" class={help ? 'on' : ''} onClick={() => setHelp((h) => !h)}><span aria-hidden="true">?</span></button>
+            <button type="button" class="expand-btn" onClick={() => expand('stage')} title={t.expandStage} aria-label={t.expandStage} aria-expanded={expanded === 'stage'}>
               <ExpandIcon />
             </button>
           </div>
         </div>
 
         {help && (
-          <div class="help">
+          <div class="help" id="controls-help" role="region" aria-label={t.helpHead}>
             <b>{t.helpHead}</b>
+            <p class="hint">{t.helpFocus}</p>
             <ul>
               <li><kbd>{t.helpMouse[0]}</kbd> {t.helpMouse[1]} · <kbd>{t.helpMouse[2]}</kbd> {t.helpMouse[3]} · <kbd>{t.helpMouse[4]}</kbd> {t.helpMouse[5]}</li>
               <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> {t.helpWalk} · <kbd>Q</kbd><kbd>E</kbd> {t.helpTurn} · <kbd>R</kbd><kbd>F</kbd> {t.helpUpDown} · <kbd>+</kbd><kbd>−</kbd> {t.helpZoom}</li>
@@ -296,18 +326,18 @@ export default function App() {
         )}
 
         {step?.scene.type === 'balance' || step?.scene.type === 'box' ? (
-          <div class="legend">
-            <span><i style="--c:#f2a93b" />x³</span>
-            <span><i style="--c:#3b82f6" />x²</span>
-            <span><i style="--c:#22c55e" />x</span>
-            <span><i style="--c:#a855f7" />y</span>
-            <span><i style="--c:#facc15" />1</span>
-            <span><i style="--c:#ef4444" />{t.negative}</span>
+          <div class="legend" role="group" aria-label={t.legend}>
+            <span><i style={`--c:${COLORS.x3}`} aria-hidden="true" />x³</span>
+            <span><i style={`--c:${COLORS.x2}`} aria-hidden="true" />x²</span>
+            <span><i style={`--c:${COLORS.x}`} aria-hidden="true" />x</span>
+            <span><i style={`--c:${COLORS.y}`} aria-hidden="true" />y</span>
+            <span><i style={`--c:${COLORS.one}`} aria-hidden="true" />1</span>
+            <span><i class="neg" style={`--c:${COLORS.neg}`} aria-hidden="true" />{t.negative} ({t.striped})</span>
           </div>
         ) : null}
 
         {result.error ? (
-          <div class="card error">
+          <div class="card error" id="eq-error" role="alert">
             <h2>{t.errTitle}</h2>
             <p>{result.error}</p>
             <p class="hint">
@@ -316,52 +346,55 @@ export default function App() {
           </div>
         ) : (
           step && (
-            <div class="card" ref={card}>
-              <div class="nav">
-                <button class="arrow" onClick={() => go(stepIdx - 1)} disabled={stepIdx === 0} aria-label={t.prev}>
-                  ◀
+            <section class="card" ref={card} id="step-card" tabIndex={-1} aria-label={`${t.stepsRegion} ${Math.min(stepIdx, last) + 1} / ${steps.length}`}>
+              <nav class="nav" aria-label={t.stepsNav}>
+                <button type="button" class="arrow" onClick={() => go(stepIdx - 1)} disabled={stepIdx === 0} aria-label={t.prev}>
+                  <span aria-hidden="true">◀</span>
                 </button>
                 <div class="progress">
                   <div class="count">
                     {t.step} {stepIdx + 1} / {steps.length}
-                    <button class="expand-btn steps-expand" onClick={() => expand('steps')} title={t.expandSteps} aria-label={t.expandSteps}>
+                    <button class="expand-btn steps-expand" onClick={() => expand('steps')} title={t.expandSteps} aria-label={t.expandSteps} aria-expanded={expanded === 'steps'}>
                       <ExpandIcon />
                     </button>
                   </div>
-                  <div class="dots">
+                  <ol class="dots">
                     {steps.map((s, i) => (
-                      <button
-                        key={i}
-                        class={`dot${i === stepIdx ? ' on' : ''}${i < stepIdx ? ' done' : ''}`}
-                        title={s.title}
-                        onClick={() => go(i)}
-                        aria-label={`${t.step} ${i + 1}: ${s.title}`}
-                      />
+                      <li key={i}>
+                        <button
+                          type="button"
+                          class={`dot${i === stepIdx ? ' on' : ''}${i < stepIdx ? ' done' : ''}`}
+                          title={s.title}
+                          onClick={() => go(i)}
+                          aria-current={i === stepIdx ? 'step' : undefined}
+                          aria-label={`${t.step} ${i + 1}: ${s.title}`}
+                        />
+                      </li>
                     ))}
-                  </div>
+                  </ol>
                 </div>
-                <button class="arrow" onClick={() => go(stepIdx + 1)} disabled={stepIdx === last} aria-label={t.next}>
-                  ▶
+                <button type="button" class="arrow" onClick={() => go(stepIdx + 1)} disabled={stepIdx === last} aria-label={t.next}>
+                  <span aria-hidden="true">▶</span>
                 </button>
-              </div>
+              </nav>
               <h2>{step.title}</h2>
               <div class="eq">
                 <MathTex tex={step.latex} block />
               </div>
               <p>{step.text}</p>
               <div class="actions">
-                <button onClick={() => go(0)} disabled={stepIdx === 0}>{t.start}</button>
-                <button onClick={() => setPlaying((p) => !p)} class={playing ? 'on' : ''}>
+                <button type="button" onClick={() => go(0)} disabled={stepIdx === 0}>{t.start}</button>
+                <button type="button" onClick={() => setPlaying((p) => !p)} class={playing ? 'on' : ''}>
                   {playing ? t.pause : t.play}
                 </button>
-                <button onClick={() => go(last)} disabled={stepIdx === last}>{t.final}</button>
+                <button type="button" onClick={() => go(last)} disabled={stepIdx === last}>{t.final}</button>
                 {sol && stepIdx === last && (
                   <span class="answer">
                     {t.answer} <MathTex tex={sol.answer} />
                   </span>
                 )}
               </div>
-            </div>
+            </section>
           )
         )}
       </main>

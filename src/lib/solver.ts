@@ -256,7 +256,7 @@ function pushAddBoth(s: BalanceState, t: Poly, reason: string) {
   s.R = s.R.add(t);
   s.steps.push({
     title: T('Cancel the zero pairs', 'Cancela los pares cero'),
-    text: T('A positive block and a matching negative (red) block add up to zero, so they disappear together.', 'Un bloque positivo y su bloque negativo (rojo) suman cero, así que desaparecen juntos.'),
+    text: T('A positive block and a matching negative (red, striped) block add up to zero, so they disappear together.', 'Un bloque positivo y su bloque negativo (rojo con rayas) suman cero, así que desaparecen juntos.'),
     latex: eq(s.L, s.R),
     scene: balanceScene(s),
   });
@@ -344,8 +344,8 @@ function firstSteps(s: BalanceState, left: Node, right: Node, inputLatex: string
   s.steps.push({
     title: T('The equation is a balance', 'La ecuación es una balanza'),
     text: `${intro} ${T(
-      'Each block is a term: big orange cubes are x³, blue flats are x², green rods are x, purple rods are y and small yellow cubes are 1. Red blocks are negative.',
-      'Cada bloque es un término: los cubos naranjas grandes son x³, las placas azules son x², las barras verdes son x, las barras moradas son y, y los cubitos amarillos son 1. Los bloques rojos son negativos.',
+      'Each block is a term: big orange cubes are x³, blue flats are x², green rods are x, purple rods are y and small yellow cubes are 1. Red striped blocks are negative.',
+      'Cada bloque es un término: los cubos naranjas grandes son x³, las placas azules son x², las barras verdes son x, las barras moradas son y, y los cubitos amarillos son 1. Los bloques rojos con rayas son negativos.',
     )}`,
     latex: inputLatex,
     scene: balanceScene(s),

@@ -109,6 +109,7 @@ export class Stage {
     window.addEventListener('keydown', this.onKey);
     window.addEventListener('keyup', this.onKey);
     window.addEventListener('blur', this.clearKeys);
+    container.addEventListener('focusout', this.clearKeys);
     this.loop();
   }
 
@@ -224,14 +225,29 @@ export class Stage {
     window.removeEventListener('keydown', this.onKey);
     window.removeEventListener('keyup', this.onKey);
     window.removeEventListener('blur', this.clearKeys);
+    this.container.removeEventListener('focusout', this.clearKeys);
     this.controls.dispose();
+    this.stripeTex?.dispose();
     this.renderer.dispose();
     this.container.innerHTML = '';
   }
 
   // ------------------------------------------------------------ animation core
 
+  /** WCAG 2.3.3: with "reduce motion" on, every animation jumps straight to its end. */
+  private calm = (() => {
+    try {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return false;
+    }
+  })();
+
   private tween(dur: number, update: (k: number) => void, delay = 0, done?: () => void) {
+    if (this.calm) {
+      dur = 0;
+      delay = 0;
+    }
     if (dur <= 0 && delay <= 0) {
       update(1);
       done?.();
@@ -299,12 +315,18 @@ export class Stage {
   // ------------------------------------------------------------ game-style keyboard camera
 
   private onKey = (e: KeyboardEvent) => {
+    // WCAG 2.1.4: single-character shortcuts only act while the 3D view itself has focus.
     const el = e.target as HTMLElement | null;
-    if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) return;
     const k = e.key.toLowerCase();
+    if (e.type === 'keyup') {
+      this.keys.delete(k);
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!el || !this.container.contains(el)) return;
     if (!['w', 'a', 's', 'd', 'q', 'e', 'r', 'f', '+', '-', '='].includes(k)) return;
-    if (e.type === 'keydown') this.keys.add(k);
-    else this.keys.delete(k);
+    e.preventDefault();
+    this.keys.add(k);
   };
 
   private clearKeys = () => this.keys.clear();
@@ -373,6 +395,29 @@ export class Stage {
     }
   }
 
+  private stripeTex?: THREE.CanvasTexture;
+  private stripes(): THREE.CanvasTexture {
+    if (this.stripeTex) return this.stripeTex;
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const g = c.getContext('2d')!;
+    g.fillStyle = '#ffffff';
+    g.fillRect(0, 0, 64, 64);
+    g.strokeStyle = '#3a1500';
+    g.lineWidth = 11;
+    for (let k = -64; k <= 128; k += 32) {
+      g.beginPath();
+      g.moveTo(k, 64);
+      g.lineTo(k + 64, 0);
+      g.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    this.stripeTex = tex;
+    return tex;
+  }
+
   private addTile(t: TileObj, animate: boolean, n: number) {
     const mat = new THREE.MeshStandardMaterial({
       color: t.color,
@@ -383,6 +428,11 @@ export class Stage {
       emissive: t.added ? new THREE.Color('#f97316') : new THREE.Color('#000000'),
       emissiveIntensity: t.added ? 0.35 : 0,
     });
+    // Colour is never the only cue: negative blocks carry diagonal stripes (readable with any colour vision).
+    if (t.negative) {
+      mat.map = this.stripes();
+      mat.needsUpdate = true;
+    }
     const mesh = new THREE.Mesh(this.unitBox, mat);
     mesh.castShadow = true;
     mesh.receiveShadow = true;

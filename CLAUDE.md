@@ -33,6 +33,7 @@ Conventions:
 - All user-facing text is bilingual via `T(en, es)` from `i18n.ts` (Spanish-MX default, English-US alt). New strings need both languages, including question explanations in Learn.
 - `astro.config.mjs` sets `base: '/projects/algebra-3d'`; asset URLs in `.astro`/components must use `import.meta.env.BASE_URL`.
 - `index.astro` contains the GTM/GA4 snippets and the Open Graph meta (crawlers don't run JS, so previews are static).
+- Accessibility (WCAG 2.2 AAA target, screen-reader and colour-blind users): formulas go through `MathTex` (spoken `aria-label` from `speakMath` in `lib/a11y.ts`), every 3D scene has a text description (`describeScene`) and a live-region announcement per step, camera keys act only while the 3D view has focus (2.1.4), targets are >= 44px, text contrast is >= 7:1, and colour is never the only cue (negative blocks are striped, answers get ✓/✗, stars are ★/☆). Block and curve colours live in `COLORS` (scene.ts) and `tests/colorblind.test.ts` checks them under protan/deutan/tritan simulation; new colours must pass it. New UI needs accessible names in both languages.
 - Mobile layout (<=720px) uses full-screen expand buttons; check both layouts when changing UI.
 
 ## Deploy

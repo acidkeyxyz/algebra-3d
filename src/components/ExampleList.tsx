@@ -16,19 +16,21 @@ const BATCH = 14;
 
 function Row({ ex, starred, active, t, onPick, onToggleFav }: { ex: Example; starred: boolean; active: boolean } & Pick<Props, 't' | 'onPick' | 'onToggleFav'>) {
   return (
-    <div class={`ex-row${active ? ' on' : ''}`}>
-      <button class="ex-main" onClick={() => onPick(ex.q)} title={pretty(ex.q)}>
+    <div class={`ex-row${active ? ' on' : ''}`} role="listitem">
+      <button type="button" class="ex-main" onClick={() => onPick(ex.q)} title={pretty(ex.q)} aria-current={active ? 'true' : undefined}>
         <span class="lvl">{t.levels[ex.level] ?? (ex.level || t.mine)}</span>
         <span class="f">{pretty(ex.q)}</span>
       </button>
+      {/* The name never changes; aria-pressed carries the on/off state. */}
       <button
+        type="button"
         class={`star${starred ? ' on' : ''}`}
         onClick={() => onToggleFav(ex)}
         aria-pressed={starred}
-        aria-label={starred ? t.unstar : t.star}
+        aria-label={`${t.favorite}: ${pretty(ex.q)}`}
         title={starred ? t.unstar : t.star}
       >
-        {starred ? '★' : '☆'}
+        <span aria-hidden="true">{starred ? '★' : '☆'}</span>
       </button>
     </div>
   );
@@ -61,12 +63,12 @@ export default function ExampleList({ curated, favs, query, t, onPick, onToggleF
   const rest = [...curated, ...generated].filter((e) => !isFav(favs, e.q));
 
   return (
-    <aside class="side" aria-label={t.examples}>
-      <div class="side-head">
-        <span>★ {t.favorites}</span>
+    <aside class="side" id="examples-panel" aria-label={t.examplesRegion}>
+      <h2 class="side-head">
+        <span><span aria-hidden="true">★</span> {t.favorites}</span>
         <span class="count">{favs.length}</span>
-      </div>
-      <div class="favs">
+      </h2>
+      <div class="favs" role={favs.length ? 'list' : undefined} aria-label={favs.length ? t.favorites : undefined}>
         {favs.length ? (
           favs.map((ex) => (
             <Row key={`f-${ex.q}`} ex={ex} starred active={normKey(ex.q) === qk} t={t} onPick={onPick} onToggleFav={onToggleFav} />
@@ -75,14 +77,14 @@ export default function ExampleList({ curated, favs, query, t, onPick, onToggleF
           <p class="empty">{t.emptyFavs}</p>
         )}
       </div>
-      <div class="side-head">
+      <h2 class="side-head">
         <span>{t.examples}</span>
-      </div>
-      <div class="list" ref={scroller}>
+      </h2>
+      <div class="list" ref={scroller} role="list" aria-label={t.examples}>
         {rest.map((ex) => (
           <Row key={ex.q} ex={ex} starred={false} active={normKey(ex.q) === qk} t={t} onPick={onPick} onToggleFav={onToggleFav} />
         ))}
-        <div class="more" ref={sentinel}>
+        <div class="more" ref={sentinel} role="listitem">
           {t.generating}
         </div>
       </div>

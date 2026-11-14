@@ -108,14 +108,14 @@ const CONTENT: Record<Lang, Content> = {
       colors: {
         title: 'What the colours mean',
         rows: [
-          ['#f2a93b', 'Orange cube', 'x³'],
-          ['#3b82f6', 'Blue flat', 'x²'],
-          ['#22c55e', 'Green rod', 'x'],
-          ['#a855f7', 'Purple rod', 'y'],
-          ['#facc15', 'Small yellow cube', '1'],
-          ['#ef4444', 'Red block', 'negative (a red and a matching normal block cancel)'],
-          ['#f43f5e', 'Red point', 'a solution / root'],
-          ['#fbbf24', 'Yellow point', 'table value, or a crossing of only some equations'],
+          ['#E69F00', 'Orange cube', 'x³'],
+          ['#56B4E9', 'Blue flat', 'x²'],
+          ['#009E73', 'Green rod', 'x'],
+          ['#785EF0', 'Purple rod', 'y'],
+          ['#F0E442', 'Small yellow cube', '1'],
+          ['#D55E00', 'Red striped block', 'negative (a striped block and a matching plain block cancel)'],
+          ['#D55E00', 'Red point (larger, with its coordinates)', 'a solution / root'],
+          ['#F0E442', 'Yellow point', 'table value, or a crossing of only some equations'],
         ],
       },
       trouble: {
@@ -191,14 +191,14 @@ const CONTENT: Record<Lang, Content> = {
       colors: {
         title: 'Qué significan los colores',
         rows: [
-          ['#f2a93b', 'Cubo naranja', 'x³'],
-          ['#3b82f6', 'Placa azul', 'x²'],
-          ['#22c55e', 'Barra verde', 'x'],
-          ['#a855f7', 'Barra morada', 'y'],
-          ['#facc15', 'Cubito amarillo', '1'],
-          ['#ef4444', 'Bloque rojo', 'negativo (un bloque rojo y su bloque normal se cancelan)'],
-          ['#f43f5e', 'Punto rojo', 'una solución / raíz'],
-          ['#fbbf24', 'Punto amarillo', 'valor de la tabla, o cruce de solo algunas ecuaciones'],
+          ['#E69F00', 'Cubo naranja', 'x³'],
+          ['#56B4E9', 'Placa azul', 'x²'],
+          ['#009E73', 'Barra verde', 'x'],
+          ['#785EF0', 'Barra morada', 'y'],
+          ['#F0E442', 'Cubito amarillo', '1'],
+          ['#D55E00', 'Bloque rojo con rayas', 'negativo (un bloque rayado y su bloque liso se cancelan)'],
+          ['#D55E00', 'Punto rojo (más grande, con sus coordenadas)', 'una solución / raíz'],
+          ['#F0E442', 'Punto amarillo', 'valor de la tabla, o cruce de solo algunas ecuaciones'],
         ],
       },
       trouble: {
@@ -230,18 +230,44 @@ export default function HelpModal({ lang, onClose, onTry }: Props) {
   const c = CONTENT[lang];
   const s = c.sections;
   const closeBtn = useRef<HTMLButtonElement>(null);
+  const backdrop = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
     closeBtn.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        e.stopPropagation();
+        return;
+      }
+      // Trap Tab inside the dialog.
+      if (e.key === 'Tab' && backdrop.current) {
+        const f = [...backdrop.current.querySelectorAll<HTMLElement>('button, a[href], input, select, [tabindex]:not([tabindex="-1"])')].filter((n) => !n.hasAttribute('disabled'));
+        if (f.length) {
+          const first = f[0];
+          const lastEl = f[f.length - 1];
+          const a = document.activeElement;
+          if (e.shiftKey && (a === first || !backdrop.current.contains(a))) {
+            e.preventDefault();
+            lastEl.focus();
+          } else if (!e.shiftKey && (a === lastEl || !backdrop.current.contains(a))) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
       // Keep step/camera keys from acting behind the modal.
       e.stopPropagation();
     };
     window.addEventListener('keydown', onKey, true);
+    // Keep the page behind the dialog out of the accessibility tree and the tab order.
+    const host = backdrop.current?.parentElement;
+    const siblings = host ? [...host.children].filter((n) => n !== backdrop.current) : [];
+    siblings.forEach((n) => n.setAttribute('inert', ''));
     return () => {
       window.removeEventListener('keydown', onKey, true);
+      siblings.forEach((n) => n.removeAttribute('inert'));
       prev?.focus?.();
     };
   }, []);
@@ -258,24 +284,24 @@ export default function HelpModal({ lang, onClose, onTry }: Props) {
   );
 
   return (
-    <div class="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div class="modal-backdrop" ref={backdrop} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
         <header class="modal-head">
-          <h2 id="help-title">❔ {c.title}</h2>
-          <button ref={closeBtn} class="modal-close" onClick={onClose} aria-label={c.close} title={c.close}>
-            ✕
+          <h2 id="help-title"><span aria-hidden="true">❔</span> {c.title}</h2>
+          <button type="button" ref={closeBtn} class="modal-close" onClick={onClose} aria-label={c.close} title={c.close}>
+            <span aria-hidden="true">✕</span>
           </button>
         </header>
         <div class="modal-body">
           <p class="lead">{c.intro}</p>
 
           <section>
-            <h3>⌨️ {s.typing.title}</h3>
+            <h3><span aria-hidden="true">⌨️</span> {s.typing.title}</h3>
             {table(s.typing.rows)}
           </section>
 
           <section>
-            <h3>🧮 {s.kinds.title}</h3>
+            <h3><span aria-hidden="true">🧮</span> {s.kinds.title}</h3>
             <div class="kinds">
               {s.kinds.items.map((k) => (
                 <article class="kind-card" key={k.title}>
@@ -285,7 +311,7 @@ export default function HelpModal({ lang, onClose, onTry }: Props) {
                   <div class="tries">
                     <span>{c.tryIt}</span>
                     {k.examples.map((q) => (
-                      <button key={q} class="try" onClick={() => onTry(q)}>
+                      <button key={q} type="button" class="try" onClick={() => onTry(q)}>
                         {pretty(q)}
                       </button>
                     ))}
@@ -297,18 +323,18 @@ export default function HelpModal({ lang, onClose, onTry }: Props) {
 
           <div class="two-col">
             <section>
-              <h3>👣 {s.steps.title}</h3>
+              <h3><span aria-hidden="true">👣</span> {s.steps.title}</h3>
               {table(s.steps.rows)}
             </section>
             <section>
-              <h3>🎮 {s.camera.title}</h3>
+              <h3><span aria-hidden="true">🎮</span> {s.camera.title}</h3>
               {table(s.camera.rows)}
             </section>
           </div>
 
           <div class="two-col">
             <section>
-              <h3>⭐ {s.examples.title}</h3>
+              <h3><span aria-hidden="true">⭐</span> {s.examples.title}</h3>
               <ul class="help-list">
                 {s.examples.rows.map((r) => (
                   <li key={r}>{r}</li>
@@ -316,11 +342,11 @@ export default function HelpModal({ lang, onClose, onTry }: Props) {
               </ul>
             </section>
             <section>
-              <h3>🎨 {s.colors.title}</h3>
+              <h3><span aria-hidden="true">🎨</span> {s.colors.title}</h3>
               <ul class="swatches">
                 {s.colors.rows.map(([col, name, mean]) => (
                   <li key={name}>
-                    <i style={`--c:${col}`} />
+                    <i style={`--c:${col}`} aria-hidden="true" />
                     <b>{name}</b> {mean}
                   </li>
                 ))}
@@ -329,7 +355,7 @@ export default function HelpModal({ lang, onClose, onTry }: Props) {
           </div>
 
           <section>
-            <h3>🛠️ {s.trouble.title}</h3>
+            <h3><span aria-hidden="true">🛠️</span> {s.trouble.title}</h3>
             {table(s.trouble.rows)}
           </section>
         </div>

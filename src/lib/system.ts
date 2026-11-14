@@ -14,7 +14,8 @@ export const MAX_EQS = 10;
 /** Spread curve labels along the curves so they don't pile up at a crossing. */
 const LABEL_AT = [0.92, 0.1, 0.72, 0.3, 0.55, 0.82, 0.2, 0.62, 0.4, 0.97];
 
-const PALETTE = ['#38bdf8', '#f472b6', '#a3e635', '#fbbf24', '#c084fc', '#2dd4bf', '#fb923c', '#60a5fa', '#f87171', '#4ade80'];
+// Colour-blind safe (Okabe–Ito). Every curve is also named by its label "(n) equation", so colour is never the only cue.
+const PALETTE = ['#56B4E9', '#E69F00', '#CC79A7', '#F0E442', '#009E73', '#B8A9FF', '#D55E00', '#E2E8F0', '#8DD3C7', '#FFB3BA'];
 
 type F2 = (x: number, y: number) => number;
 
@@ -626,7 +627,7 @@ export function systemSolution(parts: string[]): Solution {
   const infinite = N === 2 && rebuilt[0].res.infinite;
   const finalPts = allPts.map((p, i) => {
     const c = common.includes(p);
-    return gp(`final${i}`, p.x, p.y, c ? COLORS.root : '#fbbf24', ptLabel(p), c || N === 2);
+    return gp(`final${i}`, p.x, p.y, c ? COLORS.root : COLORS.point, ptLabel(p), c || N === 2);
   });
 
   if (N === 2 && common.length && !infinite) {
